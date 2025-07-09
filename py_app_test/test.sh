@@ -2,6 +2,8 @@
 
 pip install -e /openedx/requirements/app
 
+pip install coverage genbadge
+
 if [ -f "/openedx/requirements/app/test_requirements.txt" ]; then
     echo "Installing test requirements..."
     pip install -r /openedx/requirements/app/test_requirements.txt

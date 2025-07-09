@@ -34,8 +34,8 @@ jobs:
       - name: Run Tests
         run: |
           mkdir wf_tmp
-          wget https://raw.githubusercontent.com/eol-uchile/workflow-commons/vastorga/add-python-test-badge/.github/docker-compose.yml -O wf_tmp/docker-compose.yml 
-          wget https://raw.githubusercontent.com/eol-uchile/workflow-commons/vastorga/add-python-test-badge/.github/test.sh -O wf_tmp/test.sh
+          wget https://raw.githubusercontent.com/eol-uchile/workflow-commons/vastorga/add-python-test-badge/pythonapp/docker-compose.yml -O wf_tmp/docker-compose.yml 
+          wget https://raw.githubusercontent.com/eol-uchile/workflow-commons/vastorga/add-python-test-badge/pythonapp/test.sh -O wf_tmp/test.sh
           chmod +x wf_tmp/test.sh
           cd wf_tmp
           docker compose run lms /openedx/requirements/app/wf_tmp/test.sh

@@ -38,10 +38,7 @@ jobs:
           wget https://raw.githubusercontent.com/eol-uchile/workflow-commons/vastorga/add-python-test-badge/pythonapp/test.sh -O wf_tmp/test.sh
           chmod +x wf_tmp/test.sh
           cd wf_tmp
-          docker compose run --rm \
-            -v "${GITHUB_WORKSPACE}/wf_tmp:/openedx/requirements/app/wf_tmp:ro" \
-            lms \
-            bash -lc "/openedx/requirements/app/wf_tmp/test.sh"
+          docker compose run lms /openedx/requirements/app/wf_tmp/test.sh
 
       - name: Clean Tests
         run: |

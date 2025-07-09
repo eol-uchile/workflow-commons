@@ -22,7 +22,7 @@ jobs:
           app-id: ${{ inputs.app_id}}
           private-key: ${{ secrets.private_key }}
           owner: eol-uchile
-          repository: workflow-commons
+          repositories: workflow-commons
 
       - name: Checkout
         uses: actions/checkout@v4

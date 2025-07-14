@@ -1,0 +1,64 @@
+name: Test Python with badge
+
+on:
+  workflow_call:
+    secrets:
+      private_key:
+        required: true
+    inputs:
+      app_id:
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: 
+    steps:
+      - name: Create GitHub App Token
+        id: app_token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ inputs.app_id}}
+          private-key: ${{ secrets.private_key }}
+          owner: eol-uchile
+          repositories: workflow-commons
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          submodules: 'recursive'
+          token: ${{ steps.app_token.outputs.token }}
+
+      - name: Run Tests
+        run: |
+          mkdir wf_tmp
+          wget https://raw.githubusercontent.com/eol-uchile/workflow-commons/vastorga/add-python-test-badge/pythonapp/docker-compose.yml -O wf_tmp/docker-compose.yml 
+          wget https://raw.githubusercontent.com/eol-uchile/workflow-commons/vastorga/add-python-test-badge/pythonapp/test.sh -O wf_tmp/test.sh
+          chmod +x wf_tmp/test.sh
+          cd wf_tmp
+          docker compose run lms /openedx/requirements/app/wf_tmp/test.sh
+          
+      - name: Clean Tests
+        run: |
+          cd wf_tmp/
+          docker compose down
+          cd ..
+          rm -Rf wf_tmp/
+
+      - name: Configure Git
+        run: |
+          git config user.name "eolito[bot]"
+          git config user.email "217098583+eolito[bot]@users.noreply.github.com"
+
+      - name: Commit badge if changed
+        run: |
+          if [ "$(git status --porcelain coverage-badge.svg)" != "" ]
+          then
+            git add coverage-badge.svg
+            git commit -m "chore: Auto-generate coverage badge"
+            git push
+          else
+            echo "No changes to coverage badge. Skipping commit step."
+          fi

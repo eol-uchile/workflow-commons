@@ -9,6 +9,18 @@ on:
       app_id:
         required: true
         type: string
+      django-cms:
+        required: true
+        type: boolean
+      django-lms:
+        required: true
+        type: boolean
+      platform-eol:
+        required: true
+        type: boolean
+      platform-openuchile:
+        required: true
+        type: boolean
 
 jobs:
   build:
@@ -21,8 +33,8 @@ jobs:
         with:
           app-id: ${{ inputs.app_id}}
           private-key: ${{ secrets.private_key }}
-          owner: eol-uchile
-          repositories: workflow-commons
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,14 +43,36 @@ jobs:
           submodules: 'recursive'
           token: ${{ steps.app_token.outputs.token }}
 
-      - name: Run Tests
+      - name: Download test scripts
         run: |
           mkdir wf_tmp
-          wget https://raw.githubusercontent.com/eol-uchile/workflow-commons/vastorga/add-python-test-badge/pythonapp/docker-compose.yml -O wf_tmp/docker-compose.yml 
-          wget https://raw.githubusercontent.com/eol-uchile/workflow-commons/vastorga/add-python-test-badge/pythonapp/test.sh -O wf_tmp/test.sh
+          wget https://raw.githubusercontent.com/eol-uchile/workflow-commons/vastorga/update-wf/pythonapp/docker-compose.yml -O wf_tmp/docker-compose.yml 
+          wget https://raw.githubusercontent.com/eol-uchile/workflow-commons/vastorga/update-wf/pythonapp/test.sh -O wf_tmp/test.sh
           chmod +x wf_tmp/test.sh
+
+      - name: Run Tests - LMS EOL
+        if: ${{ inputs.platform-eol == true && inputs.django-lms == true }}
+        run: |
           cd wf_tmp
-          docker compose run lms /openedx/requirements/app/wf_tmp/test.sh
+          docker compose run --rm lms-eol /openedx/requirements/app/wf_tmp/test.sh
+
+      - name: Run Tests - LMS OpenUChile
+        if: ${{ inputs.platform-openuchile == true && inputs.django-lms == true }}
+        run: |
+          cd wf_tmp
+          docker compose run --rm lms-openuchile /openedx/requirements/app/wf_tmp/test.sh
+
+      - name: Run Tests - CMS EOL
+        if: ${{ inputs.platform-eol == true && inputs.django-cms == true }}
+        run: |
+          cd wf_tmp
+          docker compose run --rm cms-eol /openedx/requirements/app/wf_tmp/test.sh
+
+      - name: Run Tests - CMS OpenUChile
+        if: ${{ inputs.platform-openuchile == true && inputs.django-cms == true }}
+        run: |
+          cd wf_tmp
+          docker compose run --rm cms-openuchile /openedx/requirements/app/wf_tmp/test.sh
           
       - name: Clean Tests
         run: |
@@ -53,9 +87,11 @@ jobs:
           git config user.email "217098583+eolito[bot]@users.noreply.github.com"
 
       - name: Commit badge if changed
+        if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/koa')
         run: |
           if [ "$(git status --porcelain coverage-badge.svg)" != "" ]
           then
+            git diff coverage-badge.svg
             git add coverage-badge.svg
             git commit -m "chore: Auto-generate coverage badge"
             git push

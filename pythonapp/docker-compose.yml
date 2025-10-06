@@ -12,10 +12,54 @@ services:
     command: mongod --smallfiles --nojournal --storageEngine wiredTiger
     restart: unless-stopped
 
-  lms:
+  lms-eol:
     image: ghcr.io/eol-uchile/edx-platform:testing-eol-koa
     volumes:
       - ../:/openedx/requirements/app
+    environment:
+      SERVICE_VARIANT: lms
+      DJANGO_SETTINGS_MODULE: lms.envs.test
+      STATIC_ROOT_LMS: /openedx/staticfiles/
+      STATIC_ROOT_CMS: /openedx/staticfiles/studio/
+    depends_on:
+      - memcached
+      - mongodb
+
+  lms-openuchile:
+    image: ghcr.io/eol-uchile/edx-platform:testing-ou-koa
+    volumes:
+      - ../:/openedx/requirements/app
+    environment:
+      SERVICE_VARIANT: lms
+      DJANGO_SETTINGS_MODULE: lms.envs.test
+      STATIC_ROOT_LMS: /openedx/staticfiles/
+      STATIC_ROOT_CMS: /openedx/staticfiles/studio/
+    depends_on:
+      - memcached
+      - mongodb
+
+  cms-eol:
+    image: ghcr.io/eol-uchile/edx-platform:testing-eol-koa
+    volumes:
+      - ../:/openedx/requirements/app
+    environment:
+      SERVICE_VARIANT: cms
+      DJANGO_SETTINGS_MODULE: cms.envs.test
+      STATIC_ROOT_LMS: /openedx/staticfiles/
+      STATIC_ROOT_CMS: /openedx/staticfiles/studio/
+    depends_on:
+      - memcached
+      - mongodb
+
+  cms-openuchile:
+    image: ghcr.io/eol-uchile/edx-platform:testing-ou-koa
+    volumes:
+      - ../:/openedx/requirements/app
+    environment:
+      SERVICE_VARIANT: cms
+      DJANGO_SETTINGS_MODULE: cms.envs.test
+      STATIC_ROOT_LMS: /openedx/staticfiles/
+      STATIC_ROOT_CMS: /openedx/staticfiles/studio/
     depends_on:
       - memcached
       - mongodb

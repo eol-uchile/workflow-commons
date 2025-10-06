@@ -1,8 +1,9 @@
-#!/bin/dash
+#!/bin/bash
+set -e
 
 pip install -e /openedx/requirements/app
 
-pip install coverage genbadge
+pip install pytest-cov genbadge[coverage]
 
 if [ -f "/openedx/requirements/app/test_requirements.txt" ]; then
     echo "Installing test requirements..."
@@ -10,11 +11,12 @@ if [ -f "/openedx/requirements/app/test_requirements.txt" ]; then
 fi
 
 cd /openedx/requirements/app
-cp /openedx/edx-platform/setup.cfg .
+
 mkdir test_root
-cd test_root/
-ln -s /openedx/staticfiles .
+ln -s /openedx/staticfiles ./test_root/
 
-cd /openedx/requirements/app
+EDXAPP_TEST_MONGO_HOST=mongodb pytest .
 
-DJANGO_SETTINGS_MODULE=lms.envs.test EDXAPP_TEST_MONGO_HOST=mongodb pytest
+rm -rf test_root
+
+genbadge coverage

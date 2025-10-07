@@ -46,8 +46,8 @@ jobs:
       - name: Download test scripts
         run: |
           mkdir wf_tmp
-          wget https://raw.githubusercontent.com/eol-uchile/workflow-commons/vastorga/update-wf/pythonapp/docker-compose.yml -O wf_tmp/docker-compose.yml 
-          wget https://raw.githubusercontent.com/eol-uchile/workflow-commons/vastorga/update-wf/pythonapp/test.sh -O wf_tmp/test.sh
+          wget https://raw.githubusercontent.com/eol-uchile/workflow-commons/vastorga/add-src-install/pythonapp/docker-compose.yml -O wf_tmp/docker-compose.yml 
+          wget https://raw.githubusercontent.com/eol-uchile/workflow-commons/vastorga/add-src-install/pythonapp/test.sh -O wf_tmp/test.sh
           chmod +x wf_tmp/test.sh
 
       - name: Run Tests - LMS EOL

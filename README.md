@@ -38,3 +38,15 @@ jobs:
 - `private_key` (secret) Private key corresponding to the GitHub App, used for authentication.
 
 *The `vars.EOLITO_BOT_APP_ID` and `secrets.EOLITO_BOT_PRIVATE_KEY` are inherited from the org.*
+
+
+## Pending Verifications Cronjob (verifications_cronjob.yml)
+
+This repository provides a tiny Python bot that fetches pending verifications from a Metabase endpoint, renders a table image, and posts it to a Discord channel via webhook. Intended to run daily from GitHub Actions
+
+Four repository secrets are needed:
+
+* `METABASE_AUTH_STRING` (Metabase Basic auth string, already base64)
+* `METABASE_API_KEY` (Metabase REST API key)
+* `METABASE_URL` (HTTP(S) endpoint to the query)
+* `DISCORD_WEBHOOK_URL` (Discord webhook URL)

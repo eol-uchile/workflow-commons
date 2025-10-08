@@ -1,13 +1,13 @@
 #!/bin/bash
 set -e
 
-pip install -e /openedx/requirements/app
+pip install --src /openedx/venv/src -e /openedx/requirements/app
 
 pip install pytest-cov genbadge[coverage]
 
 if [ -f "/openedx/requirements/app/test_requirements.txt" ]; then
     echo "Installing test requirements..."
-    pip install -r /openedx/requirements/app/test_requirements.txt
+    pip install --src /openedx/venv/src -r /openedx/requirements/app/test_requirements.txt
 fi
 
 cd /openedx/requirements/app

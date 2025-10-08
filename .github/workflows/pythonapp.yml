@@ -46,33 +46,53 @@ jobs:
       - name: Download test scripts
         run: |
           mkdir wf_tmp
-          wget https://raw.githubusercontent.com/eol-uchile/workflow-commons/vastorga/update-wf/pythonapp/docker-compose.yml -O wf_tmp/docker-compose.yml 
-          wget https://raw.githubusercontent.com/eol-uchile/workflow-commons/vastorga/update-wf/pythonapp/test.sh -O wf_tmp/test.sh
+          wget https://raw.githubusercontent.com/eol-uchile/workflow-commons/main/pythonapp/docker-compose.yml -O wf_tmp/docker-compose.yml 
+          wget https://raw.githubusercontent.com/eol-uchile/workflow-commons/main/pythonapp/test.sh -O wf_tmp/test.sh
           chmod +x wf_tmp/test.sh
 
       - name: Run Tests - LMS EOL
         if: ${{ inputs.platform-eol == true && inputs.django-lms == true }}
         run: |
           cd wf_tmp
-          docker compose run --rm lms-eol /openedx/requirements/app/wf_tmp/test.sh
+          docker compose run --rm \
+            -e SERVICE_VARIANT='lms' \
+            -e DJANGO_SETTINGS_MODULE='lms.envs.test' \
+            -e STATIC_ROOT_LMS='/openedx/staticfiles/' \
+            -e STATIC_ROOT_CMS='/openedx/staticfiles/studio/' \
+            lms-eol /openedx/requirements/app/wf_tmp/test.sh
 
       - name: Run Tests - LMS OpenUChile
         if: ${{ inputs.platform-openuchile == true && inputs.django-lms == true }}
         run: |
           cd wf_tmp
-          docker compose run --rm lms-openuchile /openedx/requirements/app/wf_tmp/test.sh
+          docker compose run --rm \
+            -e SERVICE_VARIANT='lms' \
+            -e DJANGO_SETTINGS_MODULE='lms.envs.test' \
+            -e STATIC_ROOT_LMS='/openedx/staticfiles/' \
+            -e STATIC_ROOT_CMS='/openedx/staticfiles/studio/' \
+            lms-openuchile /openedx/requirements/app/wf_tmp/test.sh
 
       - name: Run Tests - CMS EOL
         if: ${{ inputs.platform-eol == true && inputs.django-cms == true }}
         run: |
           cd wf_tmp
-          docker compose run --rm cms-eol /openedx/requirements/app/wf_tmp/test.sh
+          docker compose run --rm \
+            -e SERVICE_VARIANT='cms' \
+            -e DJANGO_SETTINGS_MODULE='cms.envs.test' \
+            -e STATIC_ROOT_LMS='/openedx/staticfiles/' \
+            -e STATIC_ROOT_CMS='/openedx/staticfiles/studio/' \
+            cms-eol /openedx/requirements/app/wf_tmp/test.sh
 
       - name: Run Tests - CMS OpenUChile
         if: ${{ inputs.platform-openuchile == true && inputs.django-cms == true }}
         run: |
           cd wf_tmp
-          docker compose run --rm cms-openuchile /openedx/requirements/app/wf_tmp/test.sh
+          docker compose run --rm \
+            -e SERVICE_VARIANT='cms' \
+            -e DJANGO_SETTINGS_MODULE='cms.envs.test' \
+            -e STATIC_ROOT_LMS='/openedx/staticfiles/' \
+            -e STATIC_ROOT_CMS='/openedx/staticfiles/studio/' \
+            cms-openuchile /openedx/requirements/app/wf_tmp/test.sh
           
       - name: Clean Tests
         run: |

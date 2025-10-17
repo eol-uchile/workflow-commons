@@ -1,4 +1,4 @@
-# WF version: 1.0.1
+# WF version: 1.1.0
 
 name: Test Python with badge
 
@@ -6,10 +6,10 @@ on:
   workflow_call:
     secrets:
       private_key:
-        required: true
+        required: false
     inputs:
       app_id:
-        required: true
+        required: false
         type: string
       django-cms:
         required: true
@@ -29,8 +29,17 @@ jobs:
     runs-on: ubuntu-latest
     name: 
     steps:
+      - name: Ensure credentials (only on GH Actions)
+        if: ${{ !env.ACT }}
+        run: |
+          if [ -z "${{ inputs.app_id }}" ] || [ -z "${{ secrets.private_key }}" ]; then
+            echo "Missing inputs.app_id or secrets.private_key"
+            exit 1
+          fi
+
       - name: Create GitHub App Token
         id: app_token
+        if: ${{ !env.ACT }}
         uses: actions/create-github-app-token@v2
         with:
           app-id: ${{ inputs.app_id}}
@@ -39,6 +48,7 @@ jobs:
           repositories: ${{ github.event.repository.name }}
 
       - name: Checkout
+        if: ${{ !env.ACT }}
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
@@ -109,7 +119,7 @@ jobs:
           git config user.email "217098583+eolito[bot]@users.noreply.github.com"
 
       - name: Commit badge if changed
-        if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/koa')
+        if: ${{ !env.ACT && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/koa') }}
         run: |
           if [ "$(git status --porcelain coverage-badge.svg)" != "" ]
           then

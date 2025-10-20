@@ -39,6 +39,16 @@ jobs:
 
 *The `vars.EOLITO_BOT_APP_ID` and `secrets.EOLITO_BOT_PRIVATE_KEY` are inherited from the org.*
 
+**Local run with ACT**
+ACT allows you to run the workflow locally for development and debugging purposes.
+To use it, run the following command from each Pythonapp repository:
+
+`act -W .github/workflows/pythonapp.yml --bind`
+
+- `-W .github/workflows/pythonapp.yml` specifies the workflow file to trigger.
+- `--bind` mounts the current directory into the container so the workflow can run `docker compose` against your code — it also causes file changes (for example `coverage-badge.svg`) to be written back to your working tree.
+
+The commit step is skipped locally thanks to `if: ${{ !env.ACT }}` — this prevents local runs from pushing commits or dirtying branches. This setup is meant only to test and debug workflows locally, not to generate or push badges. Although it is not required, if you want to push the badge, just commit it manually after running act.
 
 ## Pending Verifications Cronjob (verifications_cronjob.yml)
 

@@ -1,4 +1,4 @@
-# WF version: 1.1.0
+# WF version: 2.0.0
 
 name: Test Python with badge
 
@@ -119,7 +119,7 @@ jobs:
           git config user.email "217098583+eolito[bot]@users.noreply.github.com"
 
       - name: Commit badge if changed
-        if: ${{ !env.ACT && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/koa') }}
+        if: ${{ !env.ACT && startsWith(github.ref, 'refs/heads/eol-release/') }}
         run: |
           if [ "$(git status --porcelain coverage-badge.svg)" != "" ]
           then

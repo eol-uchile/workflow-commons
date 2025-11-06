@@ -1,4 +1,4 @@
-# WF version: 2.0.0
+# WF version: 2.1.0
 
 name: Test Python with badge
 
@@ -67,6 +67,7 @@ jobs:
         run: |
           cd wf_tmp
           docker compose run --rm \
+            -e SETTINGS='test' \
             -e SERVICE_VARIANT='lms' \
             -e DJANGO_SETTINGS_MODULE='lms.envs.test' \
             -e STATIC_ROOT_LMS='/openedx/staticfiles/' \
@@ -89,6 +90,7 @@ jobs:
         run: |
           cd wf_tmp
           docker compose run --rm \
+            -e SETTINGS='test' \
             -e SERVICE_VARIANT='cms' \
             -e DJANGO_SETTINGS_MODULE='cms.envs.test' \
             -e STATIC_ROOT_LMS='/openedx/staticfiles/' \

@@ -1,4 +1,4 @@
-# WF version: 2.1.0
+# WF version: 2.2.0
 
 name: Test Python with badge
 
@@ -29,7 +29,7 @@ on:
 jobs:
   variables:
     uses: eol-uchile/workflow-commons/.github/workflows/variables.yml@files-2
-  build:
+  tests:
     needs: [ variables ]
     runs-on: ubuntu-latest
     env:
@@ -116,13 +116,15 @@ jobs:
             cms-openuchile /openedx/requirements/app/wf_tmp/test.sh
           
       - name: Clean Tests
+        if: ${{ env.ACT }}
         run: |
           cd wf_tmp/
-          docker compose down
+          docker compose down --remove-orphans
           cd ..
           rm -Rf wf_tmp/
 
       - name: Configure Git
+        if: ${{ !env.ACT }}
         run: |
           git config user.name "eolito[bot]"
           git config user.email "217098583+eolito[bot]@users.noreply.github.com"

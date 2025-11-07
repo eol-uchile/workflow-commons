@@ -1,4 +1,4 @@
-# WF version: 2.1.0
+# WF version: 2.1.1
 
 name: Test Python with badge
 
@@ -123,6 +123,7 @@ jobs:
           rm -Rf wf_tmp/
 
       - name: Configure Git
+        if: ${{ !env.ACT }}
         run: |
           git config user.name "eolito[bot]"
           git config user.email "217098583+eolito[bot]@users.noreply.github.com"

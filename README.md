@@ -48,7 +48,27 @@ To use it, run the following command from each Pythonapp repository:
 - `-W .github/workflows/pythonapp.yml` specifies the workflow file to trigger.
 - `--bind` mounts the current directory into the container so the workflow can run `docker compose` against your code — it also causes file changes (for example `coverage-badge.svg`) to be written back to your working tree.
 
-The commit step is skipped locally thanks to `if: ${{ !env.ACT }}` — this prevents local runs from pushing commits or dirtying branches. This setup is meant only to test and debug workflows locally, not to generate or push badges. Although it is not required, if you want to push the badge, just commit it manually after running act.
+The configure git & commit step are skipped locally thanks to `if: ${{ !env.ACT }}` — this prevents local runs from pushing commits or dirtying branches. This setup is meant only to test and debug workflows locally, not to generate or push badges. Although it is not required, if you want to push the badge, just commit it manually after running act.
+
+To run the workflow locally from a working branch, create a file named `pull_request.json` in the project root with the following content:
+```
+{
+  "pull_request": {
+    "head": {
+      "ref": "user/working-branch"
+    },
+    "base": {
+      "ref": "eol-release/koa"
+    }
+  }
+}
+```
+Replace `head.ref` with your working branch name (e.g., user/working-branch), and `base.ref` with the branch you would open the PR against (e.g., eol-release/koa).
+
+Then run:
+`act -W .github/workflows/pythonapp.yml --bind --eventpath pull_request.json`
+
+This simulates a GitHub pull request event so the shared variables workflow can correctly detect the release version and other metadata when running locally.
 
 ## Pending Verifications Cronjob (verifications_cronjob.yml)
 

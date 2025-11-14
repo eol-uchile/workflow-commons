@@ -1,4 +1,4 @@
-# WF version: 2.2.1
+# WF version: 2.3.0
 
 name: Test Python with badge
 
@@ -129,20 +129,28 @@ jobs:
           git config user.name "eolito[bot]"
           git config user.email "217098583+eolito[bot]@users.noreply.github.com"
 
+      - name: Show coverage badge diff
+        id: badge_diff
+        run: |
+          if [ "$(git status --porcelain coverage-badge.svg)" != "" ]
+          then
+            echo "Changes detected in coverage-badge.svg:"
+            git --no-pager diff coverage-badge.svg
+            echo "coverage_changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "No changes in coverage-badge.svg"
+            echo "coverage_changed=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Commit badge if changed
         if: |
+          steps.badge_diff.outputs.coverage_changed == 'true' && 
           !env.ACT && (
             startsWith(github.ref, 'refs/heads/eol-release/') ||
             startsWith(github.ref, 'refs/heads/openuchile-release/') ||
             startsWith(github.ref, 'refs/heads/vlabx-release/')
           )
         run: |
-          if [ "$(git status --porcelain coverage-badge.svg)" != "" ]
-          then
-            git diff coverage-badge.svg
-            git add coverage-badge.svg
-            git commit --cleanup=verbatim -m $'chore: Auto-generate coverage badge\n\n\nskip-checks: true'
-            git push
-          else
-            echo "No changes to coverage badge. Skipping commit step."
-          fi
+          git add coverage-badge.svg
+          git commit --cleanup=verbatim -m $'chore: Auto-generate coverage badge\n\n\nskip-checks: true'
+          git push

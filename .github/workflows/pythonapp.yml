@@ -31,7 +31,7 @@ on:
 
 jobs:
   variables:
-    uses: eol-uchile/workflow-commons/.github/workflows/variables.yml@files-2
+    uses: eol-uchile/workflow-commons/.github/workflows/variables.yml@main
   tests:
     needs: [ variables ]
     runs-on: ubuntu-latest
@@ -51,7 +51,7 @@ jobs:
       - name: Create GitHub App Token
         id: app_token
         if: ${{ !env.ACT }}
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ inputs.app_id}}
           private-key: ${{ secrets.private_key }}
@@ -60,7 +60,7 @@ jobs:
 
       - name: Checkout
         if: ${{ !env.ACT }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.head.sha || github.ref }}
           fetch-depth: 1

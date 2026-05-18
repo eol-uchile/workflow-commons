@@ -34,7 +34,7 @@ jobs:
 
       - name: Obtain release version
         id: release
-        uses: actions/script@v7
+        uses: actions/script@v9
         with:
           result-encoding: string
           script: |
@@ -54,7 +54,7 @@ jobs:
 
       - name: Obtain release project
         id: project
-        uses: actions/script@v7
+        uses: actions/script@v9
         with:
           result-encoding: string
           script: |
@@ -74,7 +74,7 @@ jobs:
 
       - name: Obtain release code
         id: code
-        uses: actions/script@v7
+        uses: actions/script@v9
         with:
           result-encoding: string
           script: |
@@ -88,7 +88,7 @@ jobs:
 
       - name: Define production release flag
         id: is_release
-        uses: actions/script@v7
+        uses: actions/script@v9
         with:
           result-encoding: string
           script: |

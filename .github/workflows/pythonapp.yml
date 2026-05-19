@@ -150,7 +150,8 @@ jobs:
       - name: Commit badge if changed
         if: |
           steps.badge_diff.outputs.coverage_changed == 'true' && 
-          !env.ACT && (
+          !env.ACT && 
+          github.event_name != 'pull_request_target' && (
             startsWith(github.ref, 'refs/heads/eol-release/') ||
             startsWith(github.ref, 'refs/heads/openuchile-release/') ||
             startsWith(github.ref, 'refs/heads/vlabx-release/')
@@ -158,4 +159,4 @@ jobs:
         run: |
           git add coverage-badge.svg
           git commit --cleanup=verbatim -m $'chore: Auto-generate coverage badge\n\n\nskip-checks: true'
-          git push
+          git push origin HEAD:${{ github.ref }}

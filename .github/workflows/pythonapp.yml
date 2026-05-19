@@ -150,7 +150,8 @@ jobs:
       - name: Commit badge if changed
         if: |
           steps.badge_diff.outputs.coverage_changed == 'true' && 
-          !env.ACT && (
+          !env.ACT && 
+          github.event_name == 'push' && (
             startsWith(github.ref, 'refs/heads/eol-release/') ||
             startsWith(github.ref, 'refs/heads/openuchile-release/') ||
             startsWith(github.ref, 'refs/heads/vlabx-release/')

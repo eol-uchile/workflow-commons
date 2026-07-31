@@ -1,0 +1,161 @@
+# WF version: 2.4.1
+
+name: Test Python with badge
+
+on:
+  workflow_call:
+    secrets:
+      private_key:
+        required: false
+    inputs:
+      environment:
+        required: false
+        type: string
+      app_id:
+        required: false
+        type: string
+      django-cms:
+        required: true
+        type: boolean
+      django-lms:
+        required: true
+        type: boolean
+      platform-eol:
+        required: false
+        type: boolean
+        default: true
+      platform-openuchile:
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  variables:
+    uses: eol-uchile/workflow-commons/.github/workflows/variables.yml@main
+  tests:
+    needs: [ variables ]
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    env:
+      RELEASE-NAME: ${{ needs.variables.outputs.release-name }}
+    steps:
+      - name: Ensure credentials (only on GH Actions)
+        if: ${{ !env.ACT }}
+        run: |
+          if [ -z "${{ inputs.app_id }}" ] || [ -z "${{ secrets.private_key }}" ]; then
+            echo "Missing inputs.app_id or secrets.private_key"
+            exit 1
+          fi
+
+      - name: Create GitHub App Token
+        id: app_token
+        if: ${{ !env.ACT }}
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ inputs.app_id}}
+          private-key: ${{ secrets.private_key }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+
+      - name: Checkout
+        if: ${{ !env.ACT }}
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+          fetch-depth: 1
+          submodules: 'recursive'
+          token: ${{ steps.app_token.outputs.token }}
+
+      - name: Download test scripts
+        run: |
+          mkdir wf_tmp
+          wget https://raw.githubusercontent.com/eol-uchile/workflow-commons/files-2/pythonapp/docker-compose-${{ env.RELEASE-NAME }}.yml -O wf_tmp/docker-compose.yml
+          wget https://raw.githubusercontent.com/eol-uchile/workflow-commons/files-2/pythonapp/test.sh -O wf_tmp/test.sh
+          chmod +x wf_tmp/test.sh
+
+      - name: Run Tests - LMS EOL
+        if: ${{ inputs.platform-eol == true && inputs.django-lms == true }}
+        run: |
+          cd wf_tmp
+          docker compose run --rm \
+            -e SETTINGS='test' \
+            -e SERVICE_VARIANT='lms' \
+            -e DJANGO_SETTINGS_MODULE='lms.envs.test' \
+            -e STATIC_ROOT_LMS='/openedx/staticfiles/' \
+            -e STATIC_ROOT_CMS='/openedx/staticfiles/studio/' \
+            lms-eol /openedx/requirements/app/wf_tmp/test.sh
+
+      - name: Run Tests - LMS OpenUChile
+        if: ${{ inputs.platform-openuchile == true && inputs.django-lms == true }}
+        run: |
+          cd wf_tmp
+          docker compose run --rm \
+            -e SERVICE_VARIANT='lms' \
+            -e DJANGO_SETTINGS_MODULE='lms.envs.test' \
+            -e STATIC_ROOT_LMS='/openedx/staticfiles/' \
+            -e STATIC_ROOT_CMS='/openedx/staticfiles/studio/' \
+            lms-openuchile /openedx/requirements/app/wf_tmp/test.sh
+
+      - name: Run Tests - CMS EOL
+        if: ${{ inputs.platform-eol == true && inputs.django-cms == true }}
+        run: |
+          cd wf_tmp
+          docker compose run --rm \
+            -e SETTINGS='test' \
+            -e SERVICE_VARIANT='cms' \
+            -e DJANGO_SETTINGS_MODULE='cms.envs.test' \
+            -e STATIC_ROOT_LMS='/openedx/staticfiles/' \
+            -e STATIC_ROOT_CMS='/openedx/staticfiles/studio/' \
+            cms-eol /openedx/requirements/app/wf_tmp/test.sh
+
+      - name: Run Tests - CMS OpenUChile
+        if: ${{ inputs.platform-openuchile == true && inputs.django-cms == true }}
+        run: |
+          cd wf_tmp
+          docker compose run --rm \
+            -e SERVICE_VARIANT='cms' \
+            -e DJANGO_SETTINGS_MODULE='cms.envs.test' \
+            -e STATIC_ROOT_LMS='/openedx/staticfiles/' \
+            -e STATIC_ROOT_CMS='/openedx/staticfiles/studio/' \
+            cms-openuchile /openedx/requirements/app/wf_tmp/test.sh
+
+      - name: Clean Tests
+        if: ${{ env.ACT }}
+        run: |
+          cd wf_tmp/
+          docker compose down --remove-orphans
+          cd ..
+          rm -Rf wf_tmp/
+
+      - name: Configure Git
+        if: ${{ !env.ACT }}
+        run: |
+          git config user.name "eolito[bot]"
+          git config user.email "217098583+eolito[bot]@users.noreply.github.com"
+
+      - name: Show coverage badge diff
+        id: badge_diff
+        run: |
+          if [ "$(git status --porcelain coverage-badge.svg)" != "" ]
+          then
+            echo "Changes detected in coverage-badge.svg:"
+            git --no-pager diff coverage-badge.svg
+            echo "coverage_changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "No changes in coverage-badge.svg"
+            echo "coverage_changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit badge if changed
+        if: |
+          steps.badge_diff.outputs.coverage_changed == 'true' &&
+          !env.ACT &&
+          github.event_name == 'push' && (
+            startsWith(github.ref, 'refs/heads/eol-release/') ||
+            startsWith(github.ref, 'refs/heads/openuchile-release/') ||
+            startsWith(github.ref, 'refs/heads/vlabx-release/')
+          )
+        run: |
+          git add coverage-badge.svg
+          git commit --cleanup=verbatim -m $'chore: Auto-generate coverage badge\n\n\nskip-checks: true'
+          git push

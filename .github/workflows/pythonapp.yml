@@ -8,9 +8,6 @@ on:
       private_key:
         required: false
     inputs:
-      environment:
-        required: false
-        type: string
       app_id:
         required: false
         type: string
@@ -35,7 +32,6 @@ jobs:
   tests:
     needs: [ variables ]
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
     env:
       RELEASE-NAME: ${{ needs.variables.outputs.release-name }}
     steps:

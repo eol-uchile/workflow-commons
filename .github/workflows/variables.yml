@@ -50,6 +50,10 @@ jobs:
               return "${{ github.event.pull_request.base.ref }}".replace(/^(eol|openuchile|vlabx)\/(\w+)(\.master)?$/,'$2')
             } else if ( "${{ github.event.pull_request.base.ref }}".match(/^(eol|openuchile|vlabx)-release\/(\w+)(\.master)?$/) ) { // pr to production branch case
               return "${{ github.event.pull_request.base.ref }}".replace(/^(eol|openuchile|vlabx)-release\/(\w+)(\.master)?$/,'$2')
+            } else if ( "${{ github.event.pull_request.stack.base.ref }}".match(/^(eol|openuchile|vlabx)\/(\w+)(\.master)?$/) ) { // stacked pr to development branch case
+              return "${{ github.event.pull_request.stack.base.ref }}".replace(/^(eol|openuchile|vlabx)\/(\w+)(\.master)?$/,'$2')
+            } else if ( "${{ github.event.pull_request.stack.base.ref }}".match(/^(eol|openuchile|vlabx)-release\/(\w+)(\.master)?$/) ) { // stacked pr to production branch case
+              return "${{ github.event.pull_request.stack.base.ref }}".replace(/^(eol|openuchile|vlabx)-release\/(\w+)(\.master)?$/,'$2')
             } else throw 'No version'
 
       - name: Obtain release project
@@ -70,6 +74,10 @@ jobs:
               return "${{ github.event.pull_request.base.ref }}".replace(/^(eol|openuchile|vlabx)\/.+$/,'$1')
             } else if ( "${{ github.event.pull_request.base.ref }}".match(/^(eol|openuchile|vlabx)-release\//) ) { // pr to production branch case
               return "${{ github.event.pull_request.base.ref }}".replace(/^(eol|openuchile|vlabx)-release\/.+$/,'$1')
+            } else if ( "${{ github.event.pull_request.stack.base.ref }}".match(/^(eol|openuchile|vlabx)\//) ) { // stacked pr to development branch case
+              return "${{ github.event.pull_request.stack.base.ref }}".replace(/^(eol|openuchile|vlabx)\/.+$/,'$1')
+            } else if ( "${{ github.event.pull_request.stack.base.ref }}".match(/^(eol|openuchile|vlabx)-release\//) ) { // stacked pr to production branch case
+              return "${{ github.event.pull_request.stack.base.ref }}".replace(/^(eol|openuchile|vlabx)-release\/.+$/,'$1')
             } else throw 'No project'
 
       - name: Obtain release code

@@ -13,7 +13,7 @@ services:
     restart: unless-stopped
 
   lms-eol:
-    image: ghcr.io/eol-uchile/edx-platform:testing-eol-lilac
+    image: ghcr.io/eol-uchile/openedx:testing-lilac
     volumes:
       - ../:/openedx/requirements/app
     depends_on:
@@ -21,7 +21,7 @@ services:
       - mongodb
 
   cms-eol:
-    image: ghcr.io/eol-uchile/edx-platform:testing-eol-lilac
+    image: ghcr.io/eol-uchile/openedx:testing-lilac
     volumes:
       - ../:/openedx/requirements/app
     depends_on:
